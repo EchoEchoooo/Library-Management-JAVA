@@ -4,7 +4,6 @@ import java.time.LocalDate;
 public class DatabaseHelper {
     private Connection connection;
 
-
     //Database Functions
     public DatabaseHelper(String dbName) {
         try {
@@ -111,6 +110,29 @@ public class DatabaseHelper {
         }
     }
 
+    public void editRecord(String tableName, String colName, Object newValue, Object recordId) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE " + tableName + " SET " + colName + " = ? WHERE id = ?")) {
+            preparedStatement.setObject(1, newValue);
+            preparedStatement.setObject(2, recordId);
+
+            int affectedRows = preparedStatement.executeUpdate();
+
+            if (affectedRows > 0) System.out.println(tableName + " record with ID " + recordId + " edited successfully");
+            else System.out.println(tableName + " record with ID " + recordId + " not found or not edited");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteBook(Book book) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM books WHERE id = ?")) {
+            preparedStatement.setString(1, book.getId());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void borrowBook(int userId, String bookId) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE books SET is_available = 0, borrow_date = ?, return_date = ? WHERE id = ?")) {
             preparedStatement.setString(1, LocalDate.now().toString());
@@ -209,9 +231,9 @@ public class DatabaseHelper {
         return getBookByCriterion(author, sqlQuery);
     }
 
-    public Book getBookById(int bookId) {
-        String sqlQuery = "SELECT * FROM books WHERE id = ?";
-        return getBookByCriterion(String.valueOf(bookId), sqlQuery);
+    public Book getBookById(String bookId) {
+        String sqlQuery = "SELECT * FROM books WHERE id LIKE ?";
+        return getBookByCriterion(bookId, sqlQuery);
     }
 
     private String getLocalDateorNull(ResultSet resultSet, String dateColumn) throws SQLException {
@@ -220,6 +242,44 @@ public class DatabaseHelper {
     }
     private String formatLocalDate(String localDate) {
         return localDate != null ? localDate.toString() : "N/A";
+    }
+
+    public void getBorrowedBooks(int userId) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM userbooks WHERE user_id = ?")) {
+            preparedStatement.setInt(1, userId);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()){
+                if (resultSet.isBeforeFirst()) {
+                    System.out.println("Borrowed Books for User with ID " + userId + ":");
+                    while (resultSet.next()) {
+                        String bookId = resultSet.getString("book_id");
+                        System.out.printf("%-30s %-12s %-12s\n", "Title", "Borrow Date", "Return Date");
+                        displayBookDetails(bookId);
+                    }
+                }
+                else System.out.println("No borrowed books yet");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public void displayBookDetails(String bookId) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT title, borrow_date, return_date FROM books WHERE id LIKE ?")) {
+            preparedStatement.setString(1, bookId);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()){
+                if (resultSet.next()) {
+                    String title = resultSet.getString("title");
+                    String borrow_date = getLocalDateorNull(resultSet, "borrow_date");
+                    String returnDate = getLocalDateorNull(resultSet, "return_date");
+
+                    System.out.printf("%-30s %-12s %-12s\n", title, borrow_date, returnDate);
+                }
+                else System.out.println("Book with ID " + bookId + " not found.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     //User Functions
@@ -249,6 +309,65 @@ public class DatabaseHelper {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public void deleteUser(User user) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM users WHERE name LIKE ?")) {
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public User searchUser(String name) {
+        User user = null;
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM users WHERE name LIKE ?")) {
+            preparedStatement.setString(1, name);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    String storedName = resultSet.getString("name");
+                    String contact = resultSet.getString("contact");
+                    String password = resultSet.getString("password");
+                    boolean isAdmin = resultSet.getBoolean("is_admin");
+
+                    user = new User(storedName, contact, password, isAdmin);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (user == null) System.out.println("User not found");
+
+        return user;
+    }
+
+    public User searchUser(int id) {
+        User user = null;
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM users WHERE id = ?")) {
+            preparedStatement.setInt(1, id);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    String storedName = resultSet.getString("name");
+                    String contact = resultSet.getString("contact");
+                    String password = resultSet.getString("password");
+                    boolean isAdmin = resultSet.getBoolean("is_admin");
+
+                    user = new User(storedName, contact, password, isAdmin);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (user == null) System.out.println("User not found");
+
+        return user;
     }
 
     public void displayUsers() {

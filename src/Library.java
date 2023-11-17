@@ -1,4 +1,3 @@
-import java.time.LocalDate;
 import java.util.Scanner;
 
 public class Library {
@@ -39,6 +38,7 @@ public class Library {
             case 2:
                 System.out.println("Thank you for using our application. Goodbye");
                 scanner.close();
+                databaseHelper.closeConnection();
                 System.exit(0);
             default:
                 System.out.println("Invalid Choice");
@@ -96,8 +96,7 @@ public class Library {
                     break;
 
                 case 3:
-                    System.out.println("\n\n\n\tThank you for using our program!\n\n\n");
-                    System.exit(0);
+                    loginMenu();
                     break;
 
                 default:
@@ -130,6 +129,7 @@ public class Library {
                     borrowBook();
                     break;
                 case 2:
+                    databaseHelper.getBorrowedBooks(currentUser.getId());
                     break;
                 case 3:
                     returnBook();
@@ -138,6 +138,7 @@ public class Library {
                     databaseHelper.displayBooks();
                     break;
                 case 5:
+                    editUser();
                     break;
                 case 6:
                     return;
@@ -172,8 +173,10 @@ public class Library {
                     addBook();
                     break;
                 case 2:
+                    editBook();
                     break;
                 case 3:
+                    deleteBook();
                     break;
                 case 4:
                     databaseHelper.displayBooks();
@@ -182,8 +185,10 @@ public class Library {
                     addUser();
                     break;
                 case 6:
+                    editUser();
                     break;
                 case 7:
+                    deleteUser();
                     break;
                 case 8:
                     databaseHelper.displayUsers();
@@ -213,6 +218,53 @@ public class Library {
         databaseHelper.addBook(newBook);
 
         System.out.println("Book added to the library: " + newBook.getTitle());
+    }
+
+    public void editBook() {
+        Scanner scanner = new Scanner(System.in);
+
+        Book book = searchBook();
+
+        if (book != null) {
+            System.out.println("What would you like to edit? ");
+            System.out.println("\n\t[1] ISBN");
+            System.out.println("\t[2] Title");
+            System.out.println("\t[3] Author");
+            System.out.println("\t[4] Availability");
+            System.out.println("\t[5] Exit");
+            System.out.print("\n\tEnter your Choice: ");
+
+            int ch = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (ch) {
+                case 1:
+                    System.out.println("Enter New ISBN: ");
+                    String isbn = scanner.nextLine();
+                    databaseHelper.editRecord("books", "id", isbn, book.getId());
+                    break;
+                case 2:
+                    System.out.println("Enter New Title: ");
+                    String title = scanner.nextLine();
+                    databaseHelper.editRecord("books", "title", title, book.getId());
+                    break;
+                case 3:
+                    System.out.println("Enter New Author: ");
+                    String author = scanner.nextLine();
+                    databaseHelper.editRecord("books", "author", author, book.getId());
+                    break;
+                case 4:
+                    System.out.println("The book is currently " + (book.isAvailable() ? "Available" : "Not Available") + ". Would you like to change it?(y/n): ");
+                    boolean change = scanner.nextLine().charAt(0) == 'y' ? true : false;
+
+                    if (change) databaseHelper.editRecord("books", "is_available", !book.isAvailable(), book.getId());
+                    break;
+                case 5:
+                    return;
+                default:
+                    System.out.println("Invalid Choice");
+            }
+        }
     }
 
     public Book searchBook() {
@@ -245,6 +297,18 @@ public class Library {
         }
     }
 
+    public void deleteBook() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Enter ID of Book to delete: ");
+        String bookID = scanner.nextLine();
+
+        Book foundBook = databaseHelper.getBookById(bookID);
+
+        if (foundBook != null) databaseHelper.deleteBook(foundBook);
+        else System.out.println("Unable to delete book");
+    }
+
     //User functions
     public void addUser() {
         Scanner scanner = new Scanner(System.in);
@@ -265,5 +329,82 @@ public class Library {
         databaseHelper.addUser(newUser);
 
         System.out.println("User added to the library: " + newUser.getName());
+    }
+
+    public void editUser() {
+        Scanner scanner = new Scanner(System.in);
+        int id = currentUser.getId();
+
+        if (currentUser.isAdmin()) {
+            System.out.println("Enter ID of user you want to edit: ");
+            id = scanner.nextInt();
+        }
+
+        System.out.println("What would you like to edit? ");
+        System.out.println("\n\t[1] Name");
+        System.out.println("\t[2] Contact Number");
+        System.out.println("\t[3] Password");
+        if (currentUser.isAdmin()) System.out.println("\t[4] Privileges");
+        System.out.println("\t[5] Exit");
+        System.out.print("\n\tEnter your Choice: ");
+
+        int ch = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (ch) {
+            case 1:
+                System.out.println("Enter New Name: ");
+                String name = scanner.nextLine();
+                databaseHelper.editRecord("users", "name", name, id);
+                break;
+            case 2:
+                System.out.println("Enter New Contact Number");
+                String contact = scanner.nextLine();
+                databaseHelper.editRecord("users", "contact", contact, id);
+                break;
+            case 3:
+                if (!currentUser.isAdmin()) {
+                    System.out.println("Enter Old Password: ");
+                    String oldPassword = scanner.nextLine();
+
+                    User user = databaseHelper.getUserAndPassword(currentUser.getName(), oldPassword);
+                    if (user != null) {
+                        System.out.println("Enter New Password");
+                        String newPassword = scanner.nextLine();
+                        databaseHelper.editRecord("users", "password", newPassword, id);
+                    }
+                    else System.out.println("Incorrect password");
+                }
+                else {
+                    System.out.println("Enter New Password");
+                    String newPassword = scanner.nextLine();
+
+                    databaseHelper.editRecord("users", "password", newPassword, id);
+                }
+                break;
+            case 4:
+                User user = databaseHelper.searchUser(id);
+                System.out.println("This user is currently a " + (user.isAdmin() ? "Admin" : "User") + ". Would you like to change it?(y/n)");
+                Boolean swapPrivilege = scanner.nextLine().charAt(0) == 'y' ? true : false;
+
+                if (swapPrivilege) databaseHelper.editRecord("users", "is_admin", !user.isAdmin(), id);
+                break;
+            case 5:
+                return;
+            default:
+                System.out.println("Invalid Choice");
+        }
+    }
+
+    public void deleteUser() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Enter Name of User to delete: ");
+        String name = scanner.nextLine();
+
+        User foundUser = databaseHelper.searchUser(name);
+
+        if (foundUser != null) databaseHelper.deleteUser(foundUser);
+        else System.out.println("Unable to delete user");
     }
 }
