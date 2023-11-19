@@ -9,7 +9,7 @@ public class DatabaseHelper {
         try {
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbName);
-            System.out.println("Connection to database established");
+            System.out.println("\tConnection to database established");
             createTables();
         } catch (Exception e) {
             e.printStackTrace();
@@ -117,8 +117,8 @@ public class DatabaseHelper {
 
             int affectedRows = preparedStatement.executeUpdate();
 
-            if (affectedRows > 0) System.out.println(tableName + " record with ID " + recordId + " edited successfully");
-            else System.out.println(tableName + " record with ID " + recordId + " not found or not edited");
+            if (affectedRows > 0) System.out.println("\tUser" + " record with ID " + recordId + " edited successfully");
+            else System.out.println("\tUser " + " record with ID " + recordId + " not found or not edited");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -171,19 +171,19 @@ public class DatabaseHelper {
 
     public void displayBooks() {
         try (Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery("SELECT * FROM books")) {
-            System.out.println("Library Books:");
-            System.out.printf("%-30s %-30s %-20s %-12s %-12s %-12s\n", "ID", "Title", "Author", "Available", "Borrow Date", "Return Date");
+        ResultSet resultSet = statement.executeQuery("SELECT id, title, author, is_Available FROM books")) {
+            System.out.println("\t===================================================================\n" +
+                    "\t\t\t\t      D I S P L A Y I N G   B O O K S\n" +
+                    "\t===================================================================\n");
+            System.out.printf("\t%-20s %-30s %-20s %-12s\n", "ID", "Title", "Author", "Available");
             while (resultSet.next()) {
                 String id = resultSet.getString("id");
                 String title = resultSet.getString("title");
                 String author = resultSet.getString("author");
                 boolean isAvailable = resultSet.getBoolean("is_available");
-                String borrowDate = resultSet.getString("borrow_date");
-                String returnDate = resultSet.getString("return_date");
 
-                System.out.printf("%-30s %-30s %-20s %-12b %-12s %-12s\n",
-                        id, title, author, isAvailable, borrowDate, returnDate);
+                System.out.printf("\t%-20s %-30s %-20s %-12b\n",
+                        id, title, author, isAvailable);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -250,14 +250,17 @@ public class DatabaseHelper {
 
             try (ResultSet resultSet = preparedStatement.executeQuery()){
                 if (resultSet.isBeforeFirst()) {
-                    System.out.println("Borrowed Books for User with ID " + userId + ":");
+                    System.out.println("\t===================================================================\n" +
+                            "\t\t\t\t      B O R R O W E D   B O O K S\n" +
+                            "\t===================================================================");
+                    System.out.println("\tBorrowed Books for User with ID " + userId + ":");
                     while (resultSet.next()) {
                         String bookId = resultSet.getString("book_id");
-                        System.out.printf("%-30s %-12s %-12s\n", "Title", "Borrow Date", "Return Date");
+                        System.out.printf("%-30s %-12s %-12s\n", "\tTitle", "Borrow Date", "Return Date");
                         displayBookDetails(bookId);
                     }
                 }
-                else System.out.println("No borrowed books yet");
+                else System.out.println("\tNo borrowed books yet");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -273,16 +276,16 @@ public class DatabaseHelper {
                     String borrow_date = getLocalDateorNull(resultSet, "borrow_date");
                     String returnDate = getLocalDateorNull(resultSet, "return_date");
 
-                    System.out.printf("%-30s %-12s %-12s\n", title, borrow_date, returnDate);
+                    System.out.printf("\n\t%-30s %-12s %-12s", title, borrow_date, returnDate);
+                    System.out.println("");
                 }
-                else System.out.println("Book with ID " + bookId + " not found.");
+                else System.out.println("\tBook with ID " + bookId + " not found.");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    //User Functions
     public void addUser(User user) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users (name, contact, password, is_admin) VALUES (?, ?, ?, ?)")) {
             preparedStatement.setString(1, user.getName());
@@ -297,14 +300,14 @@ public class DatabaseHelper {
                     try (ResultSet resultSet = statement.executeQuery("SELECT last_insert_rowid()")) {
                         if (resultSet.next()) {
                             int userId = resultSet.getInt(1);
-                            System.out.println("User ID generated: " + userId);
+                            System.out.println("\tUser ID generated: " + userId);
                         } else {
-                            System.out.println("No user ID generated");
+                            System.out.println("\tNo user ID generated");
                         }
                     }
                 }
             } else {
-                System.out.println("No users inserted");
+                System.out.println("\tNo users inserted");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -315,6 +318,7 @@ public class DatabaseHelper {
         try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM users WHERE name LIKE ?")) {
             preparedStatement.setString(1, user.getName());
             preparedStatement.executeUpdate();
+            System.out.println("");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -340,7 +344,7 @@ public class DatabaseHelper {
             e.printStackTrace();
         }
 
-        if (user == null) System.out.println("User not found");
+        if (user == null) System.out.println("\tUser not found");
 
         return user;
     }
@@ -365,7 +369,7 @@ public class DatabaseHelper {
             e.printStackTrace();
         }
 
-        if (user == null) System.out.println("User not found");
+        if (user == null) System.out.println("\tUser not found");
 
         return user;
     }
@@ -373,15 +377,17 @@ public class DatabaseHelper {
     public void displayUsers() {
         try (Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT * FROM users")) {
-            System.out.println("Library Users:");
+            System.out.println("\t===================================================================\n" +
+                    "\t\t\t      D I S P L A Y I N G   U S E R S\n" +
+                    "\t===================================================================");
+
+            System.out.printf("\t%-4s | %-20s | %-15s | %-15s%n", "ID", "Username", "Contact Number", "Privileges");
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String name = resultSet.getString("name");
                 String contact = resultSet.getString("contact");
-                String password = resultSet.getString("password");
                 boolean isAdmin = resultSet.getBoolean("is_admin");
-
-                System.out.println(id + " | " + name + " | " + contact + " | " + password + " | " + (isAdmin ? "Admin" : "User"));
+                System.out.printf("\t%-4s | %-20s | %-15s | %-15s%n", id, name, contact, isAdmin ? "Admin" : "User");
             }
         } catch (SQLException e) {
             e.printStackTrace();

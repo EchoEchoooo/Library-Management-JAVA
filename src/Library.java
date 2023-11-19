@@ -26,8 +26,12 @@ public class Library {
     private void loginMenu() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("1. Login");
-        System.out.println("2. Exit");
+        System.out.println("\n\n\t===================================================================");
+        System.out.println("\t\t  L I B R A R Y  M A N A G E M E N T  S Y S T E M");
+        System.out.println("\t===================================================================");
+        System.out.println("\n\t[1] Login");
+        System.out.println("\n\t[2] Exit");
+        System.out.print("\n\tChoose an Option: ");
 
         int ch = scanner.nextInt();
 
@@ -36,12 +40,12 @@ public class Library {
                 login();
                 break;
             case 2:
-                System.out.println("Thank you for using our application. Goodbye");
+                System.out.println("\n\tThank you for using our application. Goodbye");
                 scanner.close();
                 databaseHelper.closeConnection();
                 System.exit(0);
             default:
-                System.out.println("Invalid Choice");
+                System.out.println("\n\tInvalid Choice");
                 break;
         }
     }
@@ -49,21 +53,24 @@ public class Library {
     private void login() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Enter your username: ");
+        System.out.println("\n\n\t===================================================================");
+        System.out.println("\t\t  L I B R A R Y  M A N A G E M E N T  S Y S T E M");
+        System.out.println("\t===================================================================");
+        System.out.print("\n\tEnter your username: ");
         String name = scanner.nextLine();
 
-        System.out.println("Enter your password: ");
+        System.out.print("\n\tEnter your password: ");
         String password = scanner.nextLine();
 
         User user = databaseHelper.getUserAndPassword(name, password);
 
         if (user != null) {
             currentUser = user;
-            System.out.println("Login successful. Welcome " + currentUser.getName());
+            System.out.println("\n\tLogin successful. Welcome " + currentUser.getName());
         }
 
         else {
-            System.out.println("Login failed.");
+            System.out.println("\n\tLogin failed.");
         }
 
     }
@@ -91,7 +98,7 @@ public class Library {
 
                 case 2:
                     if (currentUser.isAdmin()) adminSection(scanner);
-                    else System.out.println("You do not have admin privileges");
+                    else System.out.println("\tYou do not have admin privileges");
 
                     break;
 
@@ -110,10 +117,10 @@ public class Library {
     private void userSection(Scanner scanner) {
         do {
             System.out.println("\t===================================================================\n" +
-                    "\t\t\t      U S E R  M E N U\n" +
-                    "\t===================================================================");
+                    "\t\t\t\t      U S E R  M E N U\n" +
+                    "\t===================================================================\n");
 
-            System.out.println("\n\t[1] Borrow Book");
+            System.out.println("\t[1] Borrow Book");
             System.out.println("\t[2] My Borrowed Books");
             System.out.println("\t[3] Return Book/s");
             System.out.println("\t[4] Display Library");
@@ -163,7 +170,7 @@ public class Library {
             System.out.println("\t[7] Delete user account");
             System.out.println("\t[8] Display user accounts");
             System.out.println("\t[9] Back to main menu");
-            System.out.print("\n\tChoose an option: ");
+            System.out.print("\tChoose an option: ");
 
             int adminChoice = scanner.nextInt();
             scanner.nextLine();
@@ -204,57 +211,58 @@ public class Library {
     //Book functions
     public void addBook() {
         Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Enter ISBN: ");
+        System.out.println("\t===================================================================\n" +
+                "\t\t\t      A D D I N G   B O O K\n" +
+                "\t===================================================================");
+        System.out.print("\tEnter ISBN: ");
         String id = scanner.nextLine();
 
-        System.out.println("Enter Title: ");
+        System.out.print("\tEnter Title: ");
         String title = scanner.nextLine();
 
-        System.out.println("Enter Author: ");
+        System.out.print("\tEnter Author: ");
         String author = scanner.nextLine();
 
         Book newBook = new Book(id, title, author, true, null, null);
         databaseHelper.addBook(newBook);
 
-        System.out.println("Book added to the library: " + newBook.getTitle());
+        System.out.println("\tBook added to the library: " + newBook.getTitle());
     }
 
     public void editBook() {
         Scanner scanner = new Scanner(System.in);
 
-        Book book = searchBook();
+        Book book = editingBook();
 
         if (book != null) {
-            System.out.println("What would you like to edit? ");
             System.out.println("\n\t[1] ISBN");
             System.out.println("\t[2] Title");
             System.out.println("\t[3] Author");
             System.out.println("\t[4] Availability");
             System.out.println("\t[5] Exit");
-            System.out.print("\n\tEnter your Choice: ");
+            System.out.print("\tEnter your Choice: ");
 
             int ch = scanner.nextInt();
             scanner.nextLine();
 
             switch (ch) {
                 case 1:
-                    System.out.println("Enter New ISBN: ");
+                    System.out.print("\tEnter New ISBN: ");
                     String isbn = scanner.nextLine();
                     databaseHelper.editRecord("books", "id", isbn, book.getId());
                     break;
                 case 2:
-                    System.out.println("Enter New Title: ");
+                    System.out.print("\tEnter New Title: ");
                     String title = scanner.nextLine();
                     databaseHelper.editRecord("books", "title", title, book.getId());
                     break;
                 case 3:
-                    System.out.println("Enter New Author: ");
+                    System.out.print("\tEnter New Author: ");
                     String author = scanner.nextLine();
                     databaseHelper.editRecord("books", "author", author, book.getId());
                     break;
                 case 4:
-                    System.out.println("The book is currently " + (book.isAvailable() ? "Available" : "Not Available") + ". Would you like to change it?(y/n): ");
+                    System.out.println("\tThe book is currently " + (book.isAvailable() ? "Available" : "Not Available") + ". Would you like to change it?(y/n): ");
                     boolean change = scanner.nextLine().charAt(0) == 'y' ? true : false;
 
                     if (change) databaseHelper.editRecord("books", "is_available", !book.isAvailable(), book.getId());
@@ -262,15 +270,43 @@ public class Library {
                 case 5:
                     return;
                 default:
-                    System.out.println("Invalid Choice");
+                    System.out.println("\tInvalid Choice");
             }
         }
     }
 
     public Book searchBook() {
         Scanner scanner = new Scanner(System.in);
+        System.out.println("\t===================================================================\n" +
+                "\t\t\t\t      B O R R O W I N G   B O O K\n" +
+                "\t===================================================================\n");
+        System.out.print("\tEnter Book Title: ");
+        String searchCriterion = scanner.nextLine();
 
-        System.out.println("Enter Book Title: ");
+        Book foundBook = databaseHelper.getBookByTitle(searchCriterion);
+
+        return foundBook;
+    }
+
+    public Book returningBook() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\t===================================================================\n" +
+                "\t\t\t\t      R E T U R N I N G   B O O K\n" +
+                "\t===================================================================\n");
+        System.out.print("\tEnter Book Title: ");
+        String searchCriterion = scanner.nextLine();
+
+        Book foundBook = databaseHelper.getBookByTitle(searchCriterion);
+
+        return foundBook;
+    }
+
+    public Book editingBook() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\t===================================================================\n" +
+                "\t\t\t\t      E D I T I N G   B O O K\n" +
+                "\t===================================================================\n");
+        System.out.print("\tEnter Book Title: ");
         String searchCriterion = scanner.nextLine();
 
         Book foundBook = databaseHelper.getBookByTitle(searchCriterion);
@@ -282,15 +318,18 @@ public class Library {
         Scanner scanner = new Scanner(System.in);
         Book book = searchBook();
 
-        System.out.println("Is this the book you want to borrow?(y/n): ");
+        System.out.print("\n\tIs this the book you want to borrow?(y/n): ");
         boolean ch = scanner.nextLine().charAt(0) == 'y' ? true : false;
 
-        if (book != null && ch && book.isAvailable()) databaseHelper.borrowBook(currentUser.getId(), book.getId());
-        else System.out.println("Book is currently not available");
+        if (book != null && ch && book.isAvailable()) {
+            databaseHelper.borrowBook(currentUser.getId(), book.getId());
+        } else {
+            System.out.println("\n\tBook is currently not available");
+        }
     }
 
     public void returnBook() {
-        Book book = searchBook();
+        Book book = returningBook();
 
         if (book != null) {
             databaseHelper.returnBook(currentUser.getId(), book.getId());
@@ -299,49 +338,54 @@ public class Library {
 
     public void deleteBook() {
         Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Enter ID of Book to delete: ");
+        System.out.println("\t===================================================================\n" +
+                "\t\t\t\t      D E L E T I N G   B O O K\n" +
+                "\t===================================================================\n");
+        System.out.print("\tEnter ID of Book to delete: ");
         String bookID = scanner.nextLine();
 
         Book foundBook = databaseHelper.getBookById(bookID);
 
         if (foundBook != null) databaseHelper.deleteBook(foundBook);
-        else System.out.println("Unable to delete book");
+        else System.out.print("\tUnable to delete book");
     }
 
     //User functions
     public void addUser() {
         Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Enter Name: ");
+        System.out.println("\t===================================================================\n" +
+                "\t\t\t\t      C R E A T I N G   A C C O U N T\n" +
+                "\t===================================================================\n");
+        System.out.print("\tEnter Name: ");
         String name = scanner.nextLine();
 
-        System.out.println("Enter Contact Number: ");
+        System.out.print("\tEnter Contact Number: ");
         String contact = scanner.nextLine();
 
-        System.out.println("Enter Password: ");
+        System.out.print("\tEnter Password: ");
         String password = scanner.nextLine();
 
-        System.out.println("Give Admin Privileges?(y/n): ");
+        System.out.print("\tGive Admin Privileges?(y/n): ");
         Boolean isAdmin = scanner.nextLine().charAt(0) == 'y' ? true : false;
 
         User newUser = new User(name, contact, password, isAdmin);
         databaseHelper.addUser(newUser);
 
-        System.out.println("User added to the library: " + newUser.getName());
+        System.out.println("\tUser added to the library: " + newUser.getName());
     }
 
     public void editUser() {
         Scanner scanner = new Scanner(System.in);
         int id = currentUser.getId();
 
+        System.out.println("\t===================================================================\n" +
+                "\t\t\t\t      M O D I F Y I N G   A C C O U N T\n" +
+                "\t===================================================================\n");
         if (currentUser.isAdmin()) {
-            System.out.println("Enter ID of user you want to edit: ");
+            System.out.print("\tEnter ID of user you want to edit: ");
             id = scanner.nextInt();
         }
-
-        System.out.println("What would you like to edit? ");
-        System.out.println("\n\t[1] Name");
+        System.out.println("\t[1] Username");
         System.out.println("\t[2] Contact Number");
         System.out.println("\t[3] Password");
         if (currentUser.isAdmin()) System.out.println("\t[4] Privileges");
@@ -353,38 +397,41 @@ public class Library {
 
         switch (ch) {
             case 1:
-                System.out.println("Enter New Name: ");
+                System.out.print("\tEnter New Username: ");
                 String name = scanner.nextLine();
                 databaseHelper.editRecord("users", "name", name, id);
                 break;
             case 2:
-                System.out.println("Enter New Contact Number");
+                System.out.print("\tEnter New Contact Number: ");
                 String contact = scanner.nextLine();
                 databaseHelper.editRecord("users", "contact", contact, id);
                 break;
             case 3:
                 if (!currentUser.isAdmin()) {
-                    System.out.println("Enter Old Password: ");
+                    System.out.print("\tEnter Old Password: ");
                     String oldPassword = scanner.nextLine();
 
                     User user = databaseHelper.getUserAndPassword(currentUser.getName(), oldPassword);
                     if (user != null) {
-                        System.out.println("Enter New Password");
+                        System.out.print("\tEnter New Password: ");
                         String newPassword = scanner.nextLine();
                         databaseHelper.editRecord("users", "password", newPassword, id);
                     }
-                    else System.out.println("Incorrect password");
+                    else System.out.println("\tIncorrect password");
                 }
                 else {
-                    System.out.println("Enter New Password");
+                    System.out.print("\tEnter New Password: ");
                     String newPassword = scanner.nextLine();
 
                     databaseHelper.editRecord("users", "password", newPassword, id);
                 }
                 break;
             case 4:
+                System.out.println("\t===================================================================\n" +
+                        "\t\t\t\t      M O D I F Y I N G   A C C O U N T\n" +
+                        "\t===================================================================\n");
                 User user = databaseHelper.searchUser(id);
-                System.out.println("This user is currently a " + (user.isAdmin() ? "Admin" : "User") + ". Would you like to change it?(y/n)");
+                System.out.print("\tThis user is currently a " + (user.isAdmin() ? "Admin" : "User") + ". Would you like to change it?(y/n)");
                 Boolean swapPrivilege = scanner.nextLine().charAt(0) == 'y' ? true : false;
 
                 if (swapPrivilege) databaseHelper.editRecord("users", "is_admin", !user.isAdmin(), id);
@@ -392,19 +439,21 @@ public class Library {
             case 5:
                 return;
             default:
-                System.out.println("Invalid Choice");
+                System.out.println("\tInvalid Choice");
         }
     }
 
     public void deleteUser() {
         Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Enter Name of User to delete: ");
+        System.out.println("\t===================================================================\n" +
+                "\t\t\t\t      D E L E T I N G   A C C O U N T\n" +
+                "\t===================================================================\n");
+        System.out.print("\tEnter Name of User to delete: ");
         String name = scanner.nextLine();
 
         User foundUser = databaseHelper.searchUser(name);
 
         if (foundUser != null) databaseHelper.deleteUser(foundUser);
-        else System.out.println("Unable to delete user");
+        else System.out.println("\tUnable to delete user");
     }
 }
