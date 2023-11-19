@@ -1,3 +1,4 @@
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Library {
@@ -33,20 +34,26 @@ public class Library {
         System.out.println("\n\t[2] Exit");
         System.out.print("\n\tChoose an Option: ");
 
-        int ch = scanner.nextInt();
+        try {
+            int ch = scanner.nextInt();
 
-        switch (ch) {
-            case 1:
-                login();
-                break;
-            case 2:
-                System.out.println("\n\tThank you for using our application. Goodbye");
-                scanner.close();
-                databaseHelper.closeConnection();
-                System.exit(0);
-            default:
-                System.out.println("\n\tInvalid Choice");
-                break;
+            switch (ch) {
+                case 1:
+                    login();
+                    break;
+                case 2:
+                    System.out.println("\n\tThank you for using our application. Goodbye");
+                    scanner.close();
+                    databaseHelper.closeConnection();
+                    System.exit(0);
+                default:
+                    System.out.println("\n\tInvalid Choice");
+                    break;
+            }
+
+        } catch (InputMismatchException e) {
+            System.out.println("\n\tInvalid input. Please enter a valid number.");
+            scanner.nextLine();
         }
     }
 
@@ -88,27 +95,31 @@ public class Library {
             System.out.println("\n\t3. Exit");
             System.out.print("\n\tChoose an Option: ");
 
-            int ch = scanner.nextInt();
-            scanner.nextLine();
+            try {
+                int ch = scanner.nextInt();
+                scanner.nextLine();
 
-            switch (ch) {
-                case 1:
-                    userSection(scanner);
-                    break;
+                switch (ch) {
+                    case 1:
+                        userSection(scanner);
+                        break;
 
-                case 2:
-                    if (currentUser.isAdmin()) adminSection(scanner);
-                    else System.out.println("\tYou do not have admin privileges");
+                    case 2:
+                        if (currentUser.isAdmin()) adminSection(scanner);
+                        else System.out.println("\tYou do not have admin privileges");
+                        break;
 
-                    break;
+                    case 3:
+                        loginMenu();
+                        break;
 
-                case 3:
-                    loginMenu();
-                    break;
-
-                default:
-                    System.out.println("\n\tInvalid Choice!");
-                    break;
+                    default:
+                        System.out.println("\n\tInvalid Choice!");
+                        break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("\n\tInvalid input. Please enter a valid number.");
+                scanner.nextLine();
             }
 
         } while (true);
