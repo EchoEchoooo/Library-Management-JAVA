@@ -235,7 +235,8 @@ public class Library {
         Book book = editingBook();
 
         if (book != null) {
-            System.out.println("\n\t[1] ISBN");
+            System.out.println("\n\tChoose an option you want to modify.");
+            System.out.println("\t[1] ISBN");
             System.out.println("\t[2] Title");
             System.out.println("\t[3] Author");
             System.out.println("\t[4] Availability");

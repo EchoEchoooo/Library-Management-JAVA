@@ -207,16 +207,17 @@ public class DatabaseHelper {
 
                     book = new Book(id, title, author, isAvailable, null, null);
 
-                    System.out.printf("%-30s %-30s %-20s %-12s %-12s %-12s\n", "ID", "Title", "Author", "Available", "Borrow Date", "Return Date");
-                    System.out.printf("%-30s %-30s %-20s %-12b %-12s %-12s\n",
+                    System.out.printf("\n\t%-20s %-25s %-20s %-12s %-12s %-12s", "ID", "Title", "Author", "Available", "Borrow Date", "Return Date");
+                    System.out.printf("\n\t%-20s %-25s %-20s %-12b %-12s %-12s",
                             id, title, author, isAvailable, formatLocalDate(borrowDate), formatLocalDate(returnDate));
+                    System.out.println("");
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        if (book == null) System.out.println("Book not found");
+        if (book == null) System.out.println("\tBook not found");
 
         return book;
     }
