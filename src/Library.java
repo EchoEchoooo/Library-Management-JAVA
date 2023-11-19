@@ -27,7 +27,7 @@ public class Library {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("\n\n\t===================================================================");
-        System.out.println("\t\t  L I B R A R Y  M A N A G E M E N T  S Y S T E M");
+        System.out.println("\t\t      L I B R A R Y  M A N A G E M E N T  S Y S T E M");
         System.out.println("\t===================================================================");
         System.out.println("\n\t[1] Login");
         System.out.println("\n\t[2] Exit");
@@ -54,7 +54,7 @@ public class Library {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("\n\n\t===================================================================");
-        System.out.println("\t\t  L I B R A R Y  M A N A G E M E N T  S Y S T E M");
+        System.out.println("\t\t      L I B R A R Y  M A N A G E M E N T  S Y S T E M");
         System.out.println("\t===================================================================");
         System.out.print("\n\tEnter your username: ");
         String name = scanner.nextLine();
@@ -80,7 +80,7 @@ public class Library {
 
         do {
             System.out.println("\n\n\t===================================================================");
-            System.out.println("\t\t  L I B R A R Y  M A N A G E M E N T  S Y S T E M");
+            System.out.println("\t\t      L I B R A R Y  M A N A G E M E N T  S Y S T E M");
             System.out.println("\t===================================================================");
 
             System.out.println("\n\t1. User");
@@ -117,7 +117,7 @@ public class Library {
     private void userSection(Scanner scanner) {
         do {
             System.out.println("\t===================================================================\n" +
-                    "\t\t\t\t      U S E R  M E N U\n" +
+                    "\t\t\t\t\t\t    U S E R  M E N U\n" +
                     "\t===================================================================\n");
 
             System.out.println("\t[1] Borrow Book");
@@ -157,10 +157,9 @@ public class Library {
 
     private void adminSection(Scanner scanner) {
         do {
-            System.out.println("\t===================================================================\n" +
-                    "\t\t\t      A D M I N   M E N U\n" +
-                    "\t===================================================================");
-
+            System.out.println("\t===================================================================");
+            System.out.println("\t\t\t\t\t\t   A D M I N   M E N U");
+            System.out.println("\t===================================================================");
             System.out.println("\n\t[1] Add books");
             System.out.println("\t[2] Modify books");
             System.out.println("\t[3] Delete books");
@@ -263,7 +262,7 @@ public class Library {
                     databaseHelper.editRecord("books", "author", author, book.getId());
                     break;
                 case 4:
-                    System.out.println("\tThe book is currently " + (book.isAvailable() ? "Available" : "Not Available") + ". Would you like to change it?(y/n): ");
+                    System.out.print("\tThe book is currently " + (book.isAvailable() ? "Available" : "Not Available") + ". Would you like to change it?(y/n): ");
                     boolean change = scanner.nextLine().charAt(0) == 'y' ? true : false;
 
                     if (change) databaseHelper.editRecord("books", "is_available", !book.isAvailable(), book.getId());
@@ -281,10 +280,10 @@ public class Library {
         System.out.println("\t===================================================================\n" +
                 "\t\t\t\t      B O R R O W I N G   B O O K\n" +
                 "\t===================================================================\n");
-        System.out.print("\tEnter Book Title: ");
+        System.out.print("\tEnter Book ISBN: ");
         String searchCriterion = scanner.nextLine();
 
-        Book foundBook = databaseHelper.getBookByTitle(searchCriterion);
+        Book foundBook = databaseHelper.getBookById(searchCriterion);
 
         return foundBook;
     }
@@ -294,10 +293,10 @@ public class Library {
         System.out.println("\t===================================================================\n" +
                 "\t\t\t\t      R E T U R N I N G   B O O K\n" +
                 "\t===================================================================\n");
-        System.out.print("\tEnter Book Title: ");
+        System.out.print("\tEnter Book ISBN: ");
         String searchCriterion = scanner.nextLine();
 
-        Book foundBook = databaseHelper.getBookByTitle(searchCriterion);
+        Book foundBook = databaseHelper.getBookById(searchCriterion);
 
         return foundBook;
     }
@@ -307,10 +306,10 @@ public class Library {
         System.out.println("\t===================================================================\n" +
                 "\t\t\t\t      E D I T I N G   B O O K\n" +
                 "\t===================================================================\n");
-        System.out.print("\tEnter Book Title: ");
+        System.out.print("\tEnter Book ISBN: ");
         String searchCriterion = scanner.nextLine();
 
-        Book foundBook = databaseHelper.getBookByTitle(searchCriterion);
+        Book foundBook = databaseHelper.getBookById(searchCriterion);
 
         return foundBook;
     }
@@ -340,7 +339,7 @@ public class Library {
     public void deleteBook() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("\t===================================================================\n" +
-                "\t\t\t\t      D E L E T I N G   B O O K\n" +
+                "\t\t\t\t\t   D E L E T I N G   B O O K\n" +
                 "\t===================================================================\n");
         System.out.print("\tEnter ID of Book to delete: ");
         String bookID = scanner.nextLine();
@@ -348,7 +347,7 @@ public class Library {
         Book foundBook = databaseHelper.getBookById(bookID);
 
         if (foundBook != null) databaseHelper.deleteBook(foundBook);
-        else System.out.print("\tUnable to delete book");
+        else System.out.println("\tUnable to delete book");
     }
 
     //User functions

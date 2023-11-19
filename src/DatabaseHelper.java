@@ -117,8 +117,8 @@ public class DatabaseHelper {
 
             int affectedRows = preparedStatement.executeUpdate();
 
-            if (affectedRows > 0) System.out.println("\tUser" + " record with ID " + recordId + " edited successfully");
-            else System.out.println("\tUser " + " record with ID " + recordId + " not found or not edited");
+            if (affectedRows > 0) System.out.println("\tRecord with ID " + recordId + " edited successfully");
+            else System.out.println("\tRecord with ID " + recordId + " not found or not edited");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -190,7 +190,7 @@ public class DatabaseHelper {
         }
     }
 
-    private Book getBookByCriterion(String searchCriterion, String sqlQuery) {
+    private Book getBookTitle(String searchCriterion, String sqlQuery) {
         Book book = null;
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
@@ -222,19 +222,48 @@ public class DatabaseHelper {
         return book;
     }
 
+    private Book getBookId(String searchCriterion, String sqlQuery) {
+        Book book = null;
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+            preparedStatement.setString(1, "%" + searchCriterion + "%");
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if(resultSet.next()) {
+                    String id = resultSet.getString("id");
+                    String title = resultSet.getString("title");
+                    String author = resultSet.getString("author");
+                    boolean isAvailable = resultSet.getBoolean("is_available");
+
+                    book = new Book(id, title, author, isAvailable, null, null);
+
+                    System.out.printf("\n\t%-20s %-25s %-20s %-12s", "ID", "Title", "Author", "Available");
+                    System.out.printf("\n\t%-20s %-25s %-20s %-12b", id, title, author, isAvailable);
+                    System.out.println("");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (book == null) System.out.println("\tBook not found");
+
+        return book;
+    }
+
     public Book getBookByTitle(String title) {
         String sqlQuery = "SELECT * FROM books WHERE title LIKE ?";
-        return getBookByCriterion(title, sqlQuery);
+        return getBookTitle(title, sqlQuery);
     }
 
     public Book getBookByAuthor(String author) {
         String sqlQuery = "SELECT * FROM books WHERE author LIKE ?";
-        return getBookByCriterion(author, sqlQuery);
+        return getBookId(author, sqlQuery);
     }
 
     public Book getBookById(String bookId) {
         String sqlQuery = "SELECT * FROM books WHERE id LIKE ?";
-        return getBookByCriterion(bookId, sqlQuery);
+        return getBookId(bookId, sqlQuery);
     }
 
     private String getLocalDateorNull(ResultSet resultSet, String dateColumn) throws SQLException {
@@ -257,7 +286,7 @@ public class DatabaseHelper {
                     System.out.println("\tBorrowed Books for User with ID " + userId + ":");
                     while (resultSet.next()) {
                         String bookId = resultSet.getString("book_id");
-                        System.out.printf("%-30s %-12s %-12s\n", "\tTitle", "Borrow Date", "Return Date");
+                        System.out.printf("\n\t%-30s %-20s %-20s", "Title", "Borrow Date", "Return Date");
                         displayBookDetails(bookId);
                     }
                 }
@@ -277,7 +306,7 @@ public class DatabaseHelper {
                     String borrow_date = getLocalDateorNull(resultSet, "borrow_date");
                     String returnDate = getLocalDateorNull(resultSet, "return_date");
 
-                    System.out.printf("\n\t%-30s %-12s %-12s", title, borrow_date, returnDate);
+                    System.out.printf("\n\t%-30s %-20s %-20s", title, borrow_date, returnDate);
                     System.out.println("");
                 }
                 else System.out.println("\tBook with ID " + bookId + " not found.");
@@ -378,10 +407,9 @@ public class DatabaseHelper {
     public void displayUsers() {
         try (Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT * FROM users")) {
-            System.out.println("\t===================================================================\n" +
-                    "\t\t\t      D I S P L A Y I N G   U S E R S\n" +
-                    "\t===================================================================");
-
+            System.out.println("\t===================================================================");
+            System.out.println("\t\t\t\t      D I S P L A Y I N G   U S E R S");
+            System.out.println("\t===================================================================");
             System.out.printf("\t%-4s | %-20s | %-15s | %-15s%n", "ID", "Username", "Contact Number", "Privileges");
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
